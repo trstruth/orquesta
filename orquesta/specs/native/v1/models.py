@@ -289,6 +289,8 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         for task_transition_item_idict_util, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
+            if getattr(task_transition, 'retry', None) is not None:
+                next_task_names.append(task_name)
 
             if isinstance(next_task_names, six.string_types):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
