@@ -50,6 +50,7 @@ class TaskTransitionSpec(native_v1_specs.Spec):
                     spec_types.UNIQUE_ONE_KEY_DICT_LIST
                 ]
             },
+            'retry': TaskRetrySpec,
             'do': {
                 'oneOf': [
                     spec_types.NONEMPTY_STRING,
@@ -63,6 +64,7 @@ class TaskTransitionSpec(native_v1_specs.Spec):
     _context_evaluation_sequence = [
         'when',
         'publish',
+        'retry',
         'do'
     ]
 
@@ -88,6 +90,17 @@ class TaskTransitionSequenceSpec(native_v1_specs.SequenceSpec):
     _schema = {
         'type': 'array',
         'items': TaskTransitionSpec
+    }
+
+
+class TaskRetrySpec(native_v1_specs.Spec):
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'delay': spec_types.POSITIVE_INTEGER,
+            'count': spec_types.POSITIVE_INTEGER
+        },
+        'additionalProperties': False
     }
 
 
