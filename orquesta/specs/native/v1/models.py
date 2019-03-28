@@ -50,7 +50,6 @@ class TaskTransitionSpec(native_v1_specs.Spec):
                     spec_types.UNIQUE_ONE_KEY_DICT_LIST
                 ]
             },
-            'retry': TaskRetrySpec,
             'do': {
                 'oneOf': [
                     spec_types.NONEMPTY_STRING,
@@ -64,7 +63,6 @@ class TaskTransitionSpec(native_v1_specs.Spec):
     _context_evaluation_sequence = [
         'when',
         'publish',
-        'retry',
         'do'
     ]
 
@@ -90,17 +88,6 @@ class TaskTransitionSequenceSpec(native_v1_specs.SequenceSpec):
     _schema = {
         'type': 'array',
         'items': TaskTransitionSpec
-    }
-
-
-class TaskRetrySpec(native_v1_specs.Spec):
-    _schema = {
-        'type': 'object',
-        'properties': {
-            'delay': spec_types.POSITIVE_INTEGER,
-            'count': spec_types.POSITIVE_INTEGER
-        },
-        'additionalProperties': False
     }
 
 
@@ -131,6 +118,18 @@ class ItemizedSpec(native_v1_specs.Spec):
     ]
 
 
+class TaskRetrySpec(native_v1_specs.Spec):
+    _schema = {
+        'type': 'object',
+        'properties': {
+            'when': spec_types.NONEMPTY_STRING,
+            'delay': spec_types.POSITIVE_INTEGER,
+            'count': spec_types.POSITIVE_INTEGER
+        },
+        'additionalProperties': False
+    }
+
+
 class TaskSpec(native_v1_specs.Spec):
     _schema = {
         'type': 'object',
@@ -150,6 +149,7 @@ class TaskSpec(native_v1_specs.Spec):
                     spec_types.NONEMPTY_DICT,
                 ]
             },
+            'retry': TaskRetrySpec,
             'next': TaskTransitionSequenceSpec,
         },
         'additionalProperties': False
@@ -289,8 +289,6 @@ class TaskMappingSpec(native_v1_specs.MappingSpec):
         for task_transition_item_idict_util, task_transition in enumerate(task_transitions):
             condition = getattr(task_transition, 'when') or None
             next_task_names = getattr(task_transition, 'do') or []
-            if getattr(task_transition, 'retry', None) is not None:
-                next_task_names.append(task_name)
 
             if isinstance(next_task_names, six.string_types):
                 next_task_names = [x.strip() for x in next_task_names.split(',')]
