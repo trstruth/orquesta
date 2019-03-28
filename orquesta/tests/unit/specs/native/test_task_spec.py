@@ -601,3 +601,46 @@ class TaskSpecTest(test_base.OrchestraWorkflowSpecTest):
         wf_spec = self.instantiate(wf_def)
 
         self.assertDictEqual(wf_spec.inspect(), expected_errors)
+
+    def test_retry_simple(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            vars:
+              - delay: 100
+            tasks:
+              task1:
+                action: core.noop
+                retry:
+                  count: 3
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        task1 = wf_spec.tasks['task1']
+
+        self.assertEqual(task1.retry.count, 3)
+
+    def test_retry_with_condition(self):
+        wf_def = """
+            version: 1.0
+            description: A basic workflow with a delay in task.
+            vars:
+              - delay: 100
+            tasks:
+              task1:
+                action: core.noop
+                retry:
+                  when: <% failed() %>
+                  count: 3
+        """
+
+        wf_spec = self.instantiate(wf_def)
+
+        self.assertDictEqual(wf_spec.inspect(), {})
+
+        task1 = wf_spec.tasks['task1']
+
+        self.assertEqual(task1.retry.when, '<% failed() %>')
