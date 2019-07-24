@@ -160,6 +160,7 @@ class TaskSpec(native_v1_specs.Spec):
         'with',
         'action',
         'input',
+        'retry',
         'next'
     ]
 
